@@ -1,6 +1,7 @@
 {
   "name": "iteriq",
   "version": "1.0.0",
+  "type": "module",
   "description": "Campus Attendance & Location Verification System for Bells University of Technology",
   "main": "backend/src/server.js",
   "scripts": {
