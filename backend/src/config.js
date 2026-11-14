@@ -8,5 +8,7 @@ export const config = {
     supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
     courseRepCode: process.env.COURSE_REP_REGISTRATION_CODE || '$$$MYJOBHTML$$$',
+    pdfServiceUrl: process.env.PDF_SERVICE_URL || 'http://localhost:8000',
+    pdfServiceToken: process.env.PDF_SERVICE_TOKEN || 'bells-iteriq-pdf-secret-token-2026',
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
 };

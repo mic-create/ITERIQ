@@ -1,18 +1,30 @@
 import { LocationService } from '../core/location.js';
+import { apiRequest } from '../core/api.js';
+import { SessionManager } from '../core/session.js';
 
 export function renderAttendanceForm(container) {
+    const user = SessionManager.getUser() || {};
+
     container.innerHTML = `
         <div class="attendance-form-card">
             <h3>Sign Attendance</h3>
-            <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">Ensure you are physically present within the approved lecture venue geofence radius.</p>
+            <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">Your location is verified against approved Bells University lecture venue geofences.</p>
             <form id="attendance-sign-form" style="display: flex; flex-direction: column; gap: 16px;">
                 <div class="form-group">
-                    <label>Active Course</label>
-                    <select id="attendance-course" class="form-input">
-                        <option value="CSC301">CSC 301 - Software Engineering</option>
-                        <option value="CSC303">CSC 303 - Operating Systems</option>
-                        <option value="MTS301">MTS 301 - Numerical Analysis</option>
-                    </select>
+                    <label>Student Name (Verified Profile)</label>
+                    <input type="text" class="form-input" value="${user.full_name || ''}" disabled style="background: #f0f4f1;" />
+                </div>
+                <div class="form-group">
+                    <label>Matriculation Number</label>
+                    <input type="text" class="form-input" value="${user.matric_number || ''}" disabled style="background: #f0f4f1;" />
+                </div>
+                <div class="form-group">
+                    <label>Academic Level</label>
+                    <input type="text" class="form-input" value="${user.academic_level || '300 Level'}" disabled style="background: #f0f4f1;" />
+                </div>
+                <div class="form-group">
+                    <label>Course Code (e.g. CSC 301)</label>
+                    <input type="text" id="attendance-course-code" class="form-input" placeholder="CSC 301" required />
                 </div>
                 <div id="location-status-box" style="padding: 14px; background-color: var(--color-ivory); border-radius: 8px; border: 1px solid var(--color-border); font-size: 13px;">
                     <span id="loc-status-text">GPS Location not yet acquired.</span>
@@ -31,13 +43,16 @@ export function renderAttendanceForm(container) {
     const submitBtn = document.getElementById('submit-attendance-btn');
     const statusText = document.getElementById('loc-status-text');
 
+    let acquiredPosition = null;
+
     detectBtn.addEventListener('click', async () => {
         statusText.textContent = 'Detecting high-accuracy GPS position...';
         try {
             const pos = await LocationService.getCurrentPosition();
-            statusText.innerHTML = `<strong>Location Acquired:</strong> Lat: ${pos.latitude.toFixed(4)}, Lon: ${pos.longitude.toFixed(4)} <br><span style="color: var(--color-success); font-weight: 600;">GPS Accuracy: ±${pos.accuracy.toFixed(1)}m (Accepted)</span>`;
+            acquiredPosition = { ...pos, timestamp: Date.now() };
+            statusText.innerHTML = `<strong>Location Acquired:</strong> Lat: ${pos.latitude.toFixed(4)}, Lon: ${pos.longitude.toFixed(4)} <br><span style="color: var(--color-success); font-weight: 600;">GPS Accuracy: ±${pos.accuracy.toFixed(1)}m (Fresh & Ready)</span>`;
             detectBtn.style.backgroundColor = 'var(--color-success)';
-            detectBtn.textContent = 'Location Verified';
+            detectBtn.textContent = 'Location Verified Locally';
             submitBtn.disabled = false;
             submitBtn.style.opacity = '1';
             submitBtn.style.cursor = 'pointer';
@@ -47,8 +62,35 @@ export function renderAttendanceForm(container) {
         }
     });
 
-    document.getElementById('attendance-sign-form').addEventListener('submit', (e) => {
+    document.getElementById('attendance-sign-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        alert('Attendance submission prepared for backend validation contract.');
+        if (!acquiredPosition) return;
+
+        const courseCode = document.getElementById('attendance-course-code').value.trim();
+        const academicLevel = user.academic_level || '300 Level';
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying Geofence & Registering...';
+
+        try {
+            const response = await apiRequest('/attendance/verify', {
+                method: 'POST',
+                body: JSON.stringify({
+                    courseCode,
+                    academicLevel,
+                    latitude: acquiredPosition.latitude,
+                    longitude: acquiredPosition.longitude,
+                    accuracy: acquiredPosition.accuracy,
+                    timestamp: acquiredPosition.timestamp
+                })
+            });
+
+            alert(`Success! Venue verified: ${response.venue} (${response.distanceMeters}m away). Attendance recorded for ${response.courseCode}.`);
+            submitBtn.textContent = 'Attendance Recorded Successfully';
+        } catch (err) {
+            alert(`Verification Failed: ${err.message}`);
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign Attendance';
+        }
     });
 }

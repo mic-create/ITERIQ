@@ -1,8 +1,9 @@
 import { SessionManager } from '../core/session.js';
 import { renderCampusMap } from '../components/campus-map.js';
 import { renderNotificationCenter } from '../components/notification-center.js';
+import { apiRequest } from '../core/api.js';
 
-export function renderDashboardPage(container) {
+export async function renderDashboardPage(container) {
     const user = SessionManager.getUser() || { full_name: 'Bells Scholar', role: 'STUDENT', academic_level: '300 Level' };
     const isRep = user.role === 'COURSE_REPRESENTATIVE';
 
@@ -11,12 +12,11 @@ export function renderDashboardPage(container) {
             <div class="welcome-banner">
                 <div class="welcome-text">
                     <h1>Welcome back, ${user.full_name}</h1>
-                    <p>${isRep ? `Course Representative — ${user.course_represented || 'CSC 301'}` : `${user.academic_level} • Matric: ${user.matric_number || 'BU/22/CSC/1092'}`}</p>
+                    <p>${isRep ? `Course Representative — ${user.course_represented || 'Course Dashboard'}` : `${user.academic_level} • Matric: ${user.matric_number || 'BU/22/CSC/1092'}`}</p>
                 </div>
                 <div class="institution-badge">Bells University of Technology</div>
             </div>
-
-            ${isRep ? renderRepDashboardContent() : renderStudentDashboardContent()}
+            <div id="dashboard-dynamic-content">Loading dashboard...</div>
         </div>
         <style>
             .dashboard-grid { display: flex; flex-direction: column; gap: 24px; max-width: 1200px; margin: 0 auto; }
@@ -31,46 +31,46 @@ export function renderDashboardPage(container) {
         </style>
     `;
 
-    if (isRep) {
-        renderNotificationCenter(document.getElementById('rep-notifications-container'));
-    } else {
-        renderCampusMap(document.getElementById('map-preview-container'), { interactive: false });
-    }
-}
+    const dynContainer = document.getElementById('dashboard-dynamic-content');
 
-function renderStudentDashboardContent() {
-    return `
-        <div class="dash-content-grid">
-            <div class="dash-card">
-                <h3>Campus Geofence Location Preview</h3>
-                <div id="map-preview-container" style="height: 320px; border-radius: 8px; overflow: hidden; border: 1px solid var(--color-border);"></div>
-            </div>
-            <div class="dash-card">
-                <h3>Today's Attendance</h3>
-                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
-                    <div style="padding: 16px; background-color: var(--color-ivory); border-radius: 8px; border-left: 4px solid var(--color-primary);">
-                        <strong style="font-size: 14px; color: var(--color-primary);">CSC 301 - Software Engineering</strong>
-                        <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 4px;">Venue: Jeremiah Ojediran Hall</p>
-                        <span style="display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 600; color: var(--color-success); background: #e6f4ea; padding: 2px 8px; border-radius: 4px;">Verified Present</span>
+    if (isRep) {
+        try {
+            const data = await apiRequest('/attendance/representative/dashboard');
+            dynContainer.innerHTML = `
+                <div class="dash-content-grid">
+                    <div class="dash-card">
+                        <h3>Recent Attendance Submissions Feed</h3>
+                        <div id="rep-notifications-container"></div>
+                    </div>
+                    <div class="dash-card">
+                        <h3>Official Register PDF Export</h3>
+                        <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px;">Generate and retrieve publication-grade attendance registers for ${data.representative.course_code}.</p>
+                        <a href="/portal/attendance" data-link style="display: block; text-align: center; padding: 12px; background-color: var(--color-primary); color: #fff; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 14px;">Access Full Registers</a>
+                    </div>
+                </div>
+            `;
+            renderNotificationCenter(document.getElementById('rep-notifications-container'), data.notifications);
+        } catch (err) {
+            dynContainer.innerHTML = `<p style="color: var(--color-error);">Failed to load representative dashboard: ${err.message}</p>`;
+        }
+    } else {
+        dynContainer.innerHTML = `
+            <div class="dash-content-grid">
+                <div class="dash-card">
+                    <h3>Campus Geofence Location Preview</h3>
+                    <div id="map-preview-container" style="height: 320px; border-radius: 8px; overflow: hidden; border: 1px solid var(--color-border);"></div>
+                </div>
+                <div class="dash-card">
+                    <h3>Today's Attendance Status</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
+                        <div style="padding: 16px; background-color: var(--color-ivory); border-radius: 8px; border-left: 4px solid var(--color-primary);">
+                            <strong style="font-size: 14px; color: var(--color-primary);">Ready to Verify</strong>
+                            <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 4px;">Navigate to the Attendance tab to sign in at your lecture venue.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    `;
-}
-
-function renderRepDashboardContent() {
-    return `
-        <div class="dash-content-grid">
-            <div class="dash-card">
-                <h3>Recent Attendance Submissions</h3>
-                <div id="rep-notifications-container"></div>
-            </div>
-            <div class="dash-card">
-                <h3>Official Register PDF Export</h3>
-                <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px;">Generate and retrieve publication-grade attendance registers for your course.</p>
-                <a href="/portal/attendance" data-link style="display: block; text-align: center; padding: 12px; background-color: var(--color-primary); color: #fff; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 14px;">Access PDF Registers</a>
-            </div>
-        </div>
-    `;
+        `;
+        renderCampusMap(document.getElementById('map-preview-container'), { interactive: false });
+    }
 }

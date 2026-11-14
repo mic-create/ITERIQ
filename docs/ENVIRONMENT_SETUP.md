@@ -17,3 +17,8 @@
 ## 4. Deployment (Render)
 - Deploy Node.js service using root `package.json`.
 - Deploy Python FastAPI service using `python-pdf/requirements.txt` and `python-pdf/app.py`.
+# ITERIQ Environment Setup Guide
+
+## PDF Service Environment Variables
+- `PDF_SERVICE_URL`: URL of the deployed Python FastAPI PDF service (e.g., `https://iteriq-pdf-service.onrender.com`).
+- `PDF_SERVICE_TOKEN`: Shared secret token required by both the Node.js backend and Python FastAPI service for secure communication.
