@@ -1,0 +1,60 @@
+{
+  "institution": "Bells University of Technology, Ota",
+  "system": "ITERIQ",
+  "venues": [
+    {
+      "venue_id": "BUT-VEN-001",
+      "venue_name": "JEREMIAH OJEDIRAN HALL",
+      "latitude": 6.684387,
+      "longitude": 3.173601,
+      "permitted_radius_meters": 50,
+      "max_gps_accuracy_meters": 15,
+      "is_active": true
+    },
+    {
+      "venue_id": "BUT-VEN-002",
+      "venue_name": "EDOZIEN LECTURE THEATRE (ELT)",
+      "latitude": 6.684081,
+      "longitude": 3.1684382,
+      "permitted_radius_meters": 40,
+      "max_gps_accuracy_meters": 15,
+      "is_active": true
+    },
+    {
+      "venue_id": "BUT-VEN-003",
+      "venue_name": "BUPF CONFERENCE CENTER (BUPF CC)",
+      "latitude": 6.685361,
+      "longitude": 3.169830,
+      "permitted_radius_meters": 50,
+      "max_gps_accuracy_meters": 15,
+      "is_active": true
+    },
+    {
+      "venue_id": "BUT-VEN-004",
+      "venue_name": "BUPF LT",
+      "latitude": null,
+      "longitude": null,
+      "permitted_radius_meters": 40,
+      "max_gps_accuracy_meters": 15,
+      "is_active": true
+    },
+    {
+      "venue_id": "BUT-VEN-005",
+      "venue_name": "LECTURE THEATRE (LT) 1",
+      "latitude": null,
+      "longitude": null,
+      "permitted_radius_meters": 40,
+      "max_gps_accuracy_meters": 15,
+      "is_active": true
+    },
+    {
+      "venue_id": "BUT-VEN-006",
+      "venue_name": "LECTURE THEATRE (LT) 2",
+      "latitude": null,
+      "longitude": null,
+      "permitted_radius_meters": 40,
+      "max_gps_accuracy_meters": 15,
+      "is_active": true
+    }
+  ]
+}
