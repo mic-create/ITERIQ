@@ -3,8 +3,8 @@ import { SessionManager } from './session.js';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/+esm';
 
 // Frontend Supabase Client for direct Auth operations
-const SUPABASE_URL = 'https://your-project.supabase.co'; // Configured via build/env
-const SUPABASE_ANON_KEY = 'your-anon-key';
+const SUPABASE_URL = 'https://agqrdntjoztalrkwbavb.supabase.co'; // Configured via build/env
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFncXJkbnRqb3p0YWxya3diYXZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2NTM3NTAsImV4cCI6MjExMDIyOTc1MH0.lpjPts6C__57qlo2NXLfGNv8OCom2M5B4t7Ytv_3OpY';
 
 export const supabaseAuthClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
